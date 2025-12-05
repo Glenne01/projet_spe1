@@ -1,0 +1,2 @@
+*.ipynb filter=lfs diff=lfs merge=lfs -text
+opsd-time_series-2020-10-06/** filter=lfs diff=lfs merge=lfs -text
