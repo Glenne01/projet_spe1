@@ -166,20 +166,36 @@ st.markdown(f"""
     }}
 
     /* Radio buttons - texte des options */
-    .stRadio > label > div[role="radiogroup"] > label > div {{
+    .stRadio > label > div[role="radiogroup"] > label {{
+        color: {COLORS['text_dark']} !important;
+    }}
+
+    .stRadio > label > div[role="radiogroup"] > label > div:first-child {{
+        color: {COLORS['text_dark']} !important;
+    }}
+
+    .stRadio [data-baseweb="radio"] > div:last-child {{
         color: {COLORS['text_dark']} !important;
         font-weight: 500 !important;
         font-size: 0.95em !important;
     }}
 
     /* Checkbox - texte */
-    .stCheckbox > label > div {{
+    .stCheckbox > label {{
         color: {COLORS['text_dark']} !important;
         font-weight: 500 !important;
     }}
 
+    .stCheckbox span {{
+        color: {COLORS['text_dark']} !important;
+    }}
+
     /* Selectbox - texte */
-    .stSelectbox > div > div {{
+    .stSelectbox [data-baseweb="select"] {{
+        color: {COLORS['text_dark']} !important;
+    }}
+
+    .stSelectbox [data-baseweb="select"] > div {{
         color: {COLORS['text_dark']} !important;
     }}
 
@@ -198,6 +214,21 @@ st.markdown(f"""
 
     /* Headers dans la sidebar */
     [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
+        color: {COLORS['text_dark']} !important;
+    }}
+
+    /* Force TOUS les textes dans la sidebar à être visibles */
+    [data-testid="stSidebar"] * {{
+        color: {COLORS['text_dark']} !important;
+    }}
+
+    /* Exception pour les éléments qui doivent rester blancs */
+    [data-testid="stSidebar"] .info-box, [data-testid="stSidebar"] .info-box * {{
+        color: white !important;
+    }}
+
+    /* Force les labels de radio et checkbox */
+    label[data-baseweb="radio"] > div, label[data-baseweb="checkbox"] > div {{
         color: {COLORS['text_dark']} !important;
     }}
     </style>
