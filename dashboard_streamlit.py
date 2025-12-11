@@ -158,10 +158,29 @@ st.markdown(f"""
         font-weight: 700 !important;
     }}
 
+    /* Labels des widgets */
     .stSelectbox label, .stSlider label, .stRadio label, .stCheckbox label {{
         color: {COLORS['text_dark']} !important;
         font-weight: 600 !important;
         font-size: 0.95em !important;
+    }}
+
+    /* Radio buttons - texte des options */
+    .stRadio > label > div[role="radiogroup"] > label > div {{
+        color: {COLORS['text_dark']} !important;
+        font-weight: 500 !important;
+        font-size: 0.95em !important;
+    }}
+
+    /* Checkbox - texte */
+    .stCheckbox > label > div {{
+        color: {COLORS['text_dark']} !important;
+        font-weight: 500 !important;
+    }}
+
+    /* Selectbox - texte */
+    .stSelectbox > div > div {{
+        color: {COLORS['text_dark']} !important;
     }}
 
     /* Dataframes */
@@ -175,6 +194,11 @@ st.markdown(f"""
         font-weight: 700 !important;
         color: {COLORS['text_dark']} !important;
         font-size: 1.05em !important;
+    }}
+
+    /* Headers dans la sidebar */
+    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {{
+        color: {COLORS['text_dark']} !important;
     }}
     </style>
 """, unsafe_allow_html=True)
