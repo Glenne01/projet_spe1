@@ -330,6 +330,37 @@ def load_and_prepare_data():
 
     return df_model, df_de
 
+def apply_plotly_theme(fig):
+    """Applique le thème de couleurs cohérent à tous les graphiques Plotly"""
+    fig.update_layout(
+        font=dict(
+            family="Arial, sans-serif",
+            size=13,
+            color=COLORS['text_dark']
+        ),
+        title_font=dict(
+            size=16,
+            color=COLORS['text_dark'],
+            family="Arial, sans-serif"
+        ),
+        xaxis=dict(
+            title_font=dict(color=COLORS['text_dark'], size=14),
+            tickfont=dict(color=COLORS['text_dark'], size=12),
+            gridcolor='#e2e8f0'
+        ),
+        yaxis=dict(
+            title_font=dict(color=COLORS['text_dark'], size=14),
+            tickfont=dict(color=COLORS['text_dark'], size=12),
+            gridcolor='#e2e8f0'
+        ),
+        legend=dict(
+            font=dict(color=COLORS['text_dark'], size=12)
+        ),
+        plot_bgcolor='white',
+        paper_bgcolor='white'
+    )
+    return fig
+
 @st.cache_resource
 def train_models(df_model):
     """Entraîne les modèles ML"""
@@ -584,10 +615,9 @@ if comparison_mode:
             fig.update_layout(
                 title=f"{model_name}<br><sub>MAE: {mae_model:.2f} | R²: {r2_model:.3f}</sub>",
                 height=400,
-                hovermode='x unified',
-                plot_bgcolor='white',
-                paper_bgcolor='white'
+                hovermode='x unified'
             )
+            fig = apply_plotly_theme(fig)
             st.plotly_chart(fig, use_container_width=True)
 
 # ========================================
@@ -726,10 +756,9 @@ fig_main.update_layout(
     height=800,
     hovermode='x unified',
     showlegend=True,
-    plot_bgcolor='white',
-    paper_bgcolor='white',
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
 )
+fig_main = apply_plotly_theme(fig_main)
 
 st.plotly_chart(fig_main, use_container_width=True)
 
@@ -804,10 +833,9 @@ with col1:
         title="Distribution des Erreurs",
         xaxis_title="Erreur (€/MWh)",
         yaxis_title="Fréquence",
-        height=350,
-        plot_bgcolor='white',
-        paper_bgcolor='white'
+        height=350
     )
+    fig_err_dist = apply_plotly_theme(fig_err_dist)
     st.plotly_chart(fig_err_dist, use_container_width=True)
 
 with col2:
@@ -836,10 +864,9 @@ with col2:
         title="Réel vs Prédit",
         xaxis_title="Prix Réel (€/MWh)",
         yaxis_title="Prix Prédit (€/MWh)",
-        height=350,
-        plot_bgcolor='white',
-        paper_bgcolor='white'
+        height=350
     )
+    fig_scatter = apply_plotly_theme(fig_scatter)
     st.plotly_chart(fig_scatter, use_container_width=True)
 
 # ========================================
@@ -872,10 +899,9 @@ with col1:
         xaxis_title="Importance",
         yaxis_title="",
         height=max(500, top_n * 20),
-        yaxis={'categoryorder': 'total ascending'},
-        plot_bgcolor='white',
-        paper_bgcolor='white'
+        yaxis={'categoryorder': 'total ascending'}
     )
+    fig_fi = apply_plotly_theme(fig_fi)
 
     st.plotly_chart(fig_fi, use_container_width=True)
 
@@ -898,9 +924,9 @@ with col2:
 
     fig_pie.update_layout(
         title=f"Types de Features (Top {top_n})",
-        height=300,
-        paper_bgcolor='white'
+        height=300
     )
+    fig_pie = apply_plotly_theme(fig_pie)
 
     st.plotly_chart(fig_pie, use_container_width=True)
 
