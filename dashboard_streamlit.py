@@ -35,8 +35,8 @@ COLORS = {
     'volatility': '#6C5CE7',
     'solar': '#F4A261',
     'wind': '#2A9D8F',
-    'text_dark': '#2D3748',
-    'text_light': '#718096'
+    'text_dark': '#1a202c',
+    'text_light': '#4a5568'
 }
 
 # CSS personnalisé pour un look professionnel
@@ -52,14 +52,15 @@ st.markdown(f"""
         background: {COLORS['card']};
         padding: 20px;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border: 1px solid #e2e8f0;
         text-align: center;
         transition: transform 0.2s;
     }}
 
     .metric-card:hover {{
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }}
 
     .metric-icon {{
@@ -69,32 +70,33 @@ st.markdown(f"""
 
     .metric-label {{
         color: {COLORS['text_light']};
-        font-size: 0.9em;
-        font-weight: 500;
-        margin-bottom: 4px;
+        font-size: 1em;
+        font-weight: 600;
+        margin-bottom: 8px;
     }}
 
     .metric-value {{
         color: {COLORS['text_dark']};
-        font-size: 1.8em;
-        font-weight: 700;
+        font-size: 2em;
+        font-weight: 800;
     }}
 
     .metric-delta {{
         color: {COLORS['primary']};
-        font-size: 0.85em;
+        font-size: 0.95em;
+        font-weight: 600;
         margin-top: 4px;
     }}
 
     /* Titres de sections */
     .section-header {{
         color: {COLORS['text_dark']};
-        font-size: 1.5em;
-        font-weight: 700;
+        font-size: 1.8em;
+        font-weight: 800;
         margin-top: 30px;
         margin-bottom: 15px;
         padding-bottom: 10px;
-        border-bottom: 3px solid {COLORS['primary']};
+        border-bottom: 4px solid {COLORS['primary']};
     }}
 
     /* Info box */
@@ -109,24 +111,28 @@ st.markdown(f"""
     /* Interprétation automatique */
     .interpretation-box {{
         background: {COLORS['card']};
-        border-left: 4px solid {COLORS['primary']};
-        padding: 20px;
+        border-left: 5px solid {COLORS['primary']};
+        padding: 25px;
         border-radius: 8px;
         margin: 20px 0;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        border: 1px solid #e2e8f0;
     }}
 
     .interpretation-title {{
         color: {COLORS['primary']};
-        font-weight: 700;
-        font-size: 1.1em;
-        margin-bottom: 12px;
+        font-weight: 800;
+        font-size: 1.3em;
+        margin-bottom: 15px;
     }}
 
     .interpretation-item {{
         color: {COLORS['text_dark']};
-        margin: 8px 0;
+        font-size: 1.05em;
+        font-weight: 500;
+        margin: 12px 0;
         padding-left: 20px;
+        line-height: 1.6;
     }}
 
     /* Sidebar */
@@ -139,6 +145,36 @@ st.markdown(f"""
         color: {COLORS['primary']};
         cursor: help;
         margin-left: 5px;
+    }}
+
+    /* Amélioration lisibilité textes Streamlit */
+    .stMarkdown, .stMarkdown p, .stMarkdown li {{
+        color: {COLORS['text_dark']} !important;
+        font-weight: 500;
+    }}
+
+    h1, h2, h3, h4, h5, h6 {{
+        color: {COLORS['text_dark']} !important;
+        font-weight: 700 !important;
+    }}
+
+    .stSelectbox label, .stSlider label, .stRadio label, .stCheckbox label {{
+        color: {COLORS['text_dark']} !important;
+        font-weight: 600 !important;
+        font-size: 0.95em !important;
+    }}
+
+    /* Dataframes */
+    .stDataFrame {{
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }}
+
+    /* Expanders */
+    .streamlit-expanderHeader {{
+        font-weight: 700 !important;
+        color: {COLORS['text_dark']} !important;
+        font-size: 1.05em !important;
     }}
     </style>
 """, unsafe_allow_html=True)
