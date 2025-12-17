@@ -571,7 +571,7 @@ else:  # page == "Prédictions ML"
     # Filtre par année
     year_choice = st.sidebar.radio(
         "Année",
-        ["Toutes", "2020"]
+        ["Toutes", "2018", "2019", "2020"]
     )
 
     # Extraction prédictions
@@ -584,13 +584,14 @@ else:  # page == "Prédictions ML"
         feature_importance = models['feature_importance_rf']
 
     # Filtre par année
-    if year_choice == "2020":
-        mask = y_test.index.year == 2020
-        y_test_filtered = y_test[mask]
-        y_pred_filtered = y_pred[mask]
-    else:
+    if year_choice == "Toutes":
         y_test_filtered = y_test
         y_pred_filtered = y_pred
+    else:
+        year_num = int(year_choice)
+        mask = y_test.index.year == year_num
+        y_test_filtered = y_test[mask]
+        y_pred_filtered = y_pred[mask]
 
     # Calcul métriques détaillées
     errors = y_test_filtered.values - y_pred_filtered
@@ -643,7 +644,7 @@ else:  # page == "Prédictions ML"
         line=dict(color='#E63946', width=2.5)
     ))
 
-    period_text = "2020" if year_choice == "2020" else "Juillet-Septembre 2020"
+    period_text = year_choice if year_choice != "Toutes" else "Oct 2018 - Sept 2020"
     fig_pred.update_layout(
         title=f"Prédictions {model_choice} - {period_text}",
         xaxis_title="Date", yaxis_title="Prix (€/MWh)", height=500
