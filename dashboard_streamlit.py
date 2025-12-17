@@ -374,39 +374,63 @@ if page == "📊 Analyse Exploratoire (AED)":
                         row=idx, col=1
                     )
 
-            fig.update_yaxes(title_text="MW", row=idx, col=1, titlefont=dict(size=12))
-            fig.update_xaxes(tickfont=dict(size=10), row=idx, col=1)
+            fig.update_yaxes(
+                title_text="MW",
+                row=idx, col=1,
+                titlefont=dict(size=12, color='#1a202c'),
+                tickfont=dict(color='#1a202c'),
+                linecolor='#1a202c',
+                tickcolor='#1a202c'
+            )
+            fig.update_xaxes(
+                tickfont=dict(size=10, color='#1a202c'),
+                row=idx, col=1,
+                linecolor='#1a202c',
+                tickcolor='#1a202c'
+            )
 
-        fig.update_layout(height=450, margin=dict(t=40, b=30, l=60, r=20))
-        return apply_plotly_theme(fig)
+        fig.update_layout(
+            height=450,
+            margin=dict(t=40, b=30, l=60, r=20),
+            plot_bgcolor='white',
+            paper_bgcolor='white'
+        )
 
-    # Préparation des données avec les bonnes colonnes
-    df_de_raw = pd.read_csv(
-        "opsd-time_series-2020-10-06/opsd-time_series-2020-10-06/time_series_60min_singleindex.csv",
-        parse_dates=['utc_timestamp'],
-        index_col='utc_timestamp'
-    )
-    df_de_raw = df_de_raw[df_de_raw.index >= "2018-10-01"]
+        # Mettre les titres des subplots en noir
+        for annotation in fig['layout']['annotations']:
+            annotation['font'] = dict(size=12, color='#1a202c')
+
+        return fig
+
+    # Charger les données complètes pour avoir toutes les colonnes
+    @st.cache_data
+    def load_full_data():
+        df_full = pd.read_csv(
+            "opsd-time_series-2020-10-06/opsd-time_series-2020-10-06/time_series_60min_singleindex.csv",
+            parse_dates=['utc_timestamp'],
+            index_col='utc_timestamp'
+        )
+        return df_full[df_full.index >= "2018-10-01"]
+
+    df_full = load_full_data()
 
     with col1:
         st.markdown("**🌞 Production solaire**")
-        if "DE_solar_generation_actual" in df_de_raw.columns:
-            fig_solar_dist = plot_variable_compact(
-                df_de_raw,
-                "DE_solar_generation_actual",
-                "Solaire"
-            )
-            st.plotly_chart(fig_solar_dist, use_container_width=True)
+        fig_solar_dist = plot_variable_compact(
+            df_full,
+            "DE_LU_solar_generation_actual",
+            "Solaire"
+        )
+        st.plotly_chart(fig_solar_dist, use_container_width=True)
 
     with col2:
         st.markdown("**🌬️ Production éolienne**")
-        if "DE_wind_generation_actual" in df_de_raw.columns:
-            fig_wind_dist = plot_variable_compact(
-                df_de_raw,
-                "DE_wind_generation_actual",
-                "Éolien"
-            )
-            st.plotly_chart(fig_wind_dist, use_container_width=True)
+        fig_wind_dist = plot_variable_compact(
+            df_full,
+            "DE_LU_wind_generation_actual",
+            "Éolien"
+        )
+        st.plotly_chart(fig_wind_dist, use_container_width=True)
 
     # LIGNE 3 : Heatmap de corrélation en pleine largeur
     st.markdown("**🔗 Matrice de corrélation des variables**")
