@@ -568,10 +568,10 @@ else:  # page == "Prédictions ML"
         ["XGBoost", "Random Forest"]
     )
 
-    # Filtre par année
+    # Filtre par année (uniquement période de test : Juillet-Septembre 2020)
     year_choice = st.sidebar.radio(
-        "Année",
-        ["Toutes", "2018", "2019", "2020"]
+        "Période",
+        ["Juillet-Septembre 2020"]
     )
 
     # Extraction prédictions
@@ -583,15 +583,9 @@ else:  # page == "Prédictions ML"
         y_pred = models['y_pred_rf']
         feature_importance = models['feature_importance_rf']
 
-    # Filtre par année
-    if year_choice == "Toutes":
-        y_test_filtered = y_test
-        y_pred_filtered = y_pred
-    else:
-        year_num = int(year_choice)
-        mask = y_test.index.year == year_num
-        y_test_filtered = y_test[mask]
-        y_pred_filtered = y_pred[mask]
+    # Pas de filtre nécessaire car une seule période disponible
+    y_test_filtered = y_test
+    y_pred_filtered = y_pred
 
     # Calcul métriques détaillées
     errors = y_test_filtered.values - y_pred_filtered
@@ -644,9 +638,8 @@ else:  # page == "Prédictions ML"
         line=dict(color='#E63946', width=2.5)
     ))
 
-    period_text = year_choice if year_choice != "Toutes" else "Oct 2018 - Sept 2020"
     fig_pred.update_layout(
-        title=f"Prédictions {model_choice} - {period_text}",
+        title=f"Prédictions {model_choice} - Juillet-Septembre 2020",
         xaxis_title="Date", yaxis_title="Prix (€/MWh)", height=500
     )
     fig_pred = apply_plotly_theme(fig_pred)
