@@ -687,59 +687,6 @@ else:  # page == "Prédictions ML"
         fig_scatter = apply_plotly_theme(fig_scatter)
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-    # Feature importance
-    if feature_importance is not None:
-        st.markdown("<div class='section-header'>🎯 Variables Influentes</div>", unsafe_allow_html=True)
-
-        top_n = st.slider("Nombre de variables", 10, 30, 15)
-        fi_top = feature_importance.head(top_n)
-
-        fig_fi = go.Figure()
-        fig_fi.add_trace(go.Bar(
-            y=fi_top['feature'], x=fi_top['importance'], orientation='h',
-            marker=dict(color=fi_top['importance'], colorscale='Viridis', showscale=True)
-        ))
-        fig_fi.update_layout(
-            title=f"Top {top_n} Variables - {model_choice}",
-            xaxis_title="Importance", height=max(500, top_n * 25),
-            yaxis={'categoryorder': 'total ascending'}
-        )
-        fig_fi = apply_plotly_theme(fig_fi)
-        st.plotly_chart(fig_fi, use_container_width=True)
-
-    # Comparaison des deux modèles
-    st.markdown("<div class='section-header'>🔄 Comparaison XGBoost vs Random Forest</div>", unsafe_allow_html=True)
-
-    metrics_comparison = []
-    for model_name, preds in [
-        ("Random Forest", models['y_pred_rf']),
-        ("XGBoost", models['y_pred_xgb'])
-    ]:
-        # Appliquer le filtre d'année
-        if year_choice == "2020":
-            mask = models['y_test'].index.year == 2020
-            y_true = models['y_test'][mask]
-            preds_filtered = preds[mask]
-        else:
-            y_true = models['y_test']
-            preds_filtered = preds
-
-        mae_m = mean_absolute_error(y_true, preds_filtered)
-        rmse_m = np.sqrt(mean_squared_error(y_true, preds_filtered))
-        r2_m = r2_score(y_true, preds_filtered)
-        mape_m = np.mean(np.abs((y_true.values - preds_filtered) / y_true.values)) * 100
-
-        metrics_comparison.append({
-            'Modèle': model_name,
-            'MAE (€/MWh)': round(mae_m, 2),
-            'RMSE (€/MWh)': round(rmse_m, 2),
-            'R²': round(r2_m, 3),
-            'MAPE (%)': round(mape_m, 1)
-        })
-
-    df_comparison = pd.DataFrame(metrics_comparison)
-    st.dataframe(df_comparison, use_container_width=True, hide_index=True)
-
 # Footer
 st.markdown("---")
 st.markdown(f"""
