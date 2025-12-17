@@ -107,13 +107,19 @@ def load_data():
         st.error("❌ Fichier de données introuvable.")
         st.stop()
 
-    de_cols = [c for c in df60.columns if c.startswith('DE_LU_')]
-    df_de = df60[de_cols].copy()
+    # Garder toutes les colonnes DE et DE_LU pour l'AED
+    de_cols_all = [c for c in df60.columns if c.startswith('DE_LU_') or c.startswith('DE_')]
+    df_de = df60[de_cols_all].copy()
     df_de = df_de[df_de.index >= "2018-10-01"]
+
+    # Garder aussi seulement les colonnes DE_LU pour le modèle
+    de_cols_model = [c for c in df60.columns if c.startswith('DE_LU_')]
+    df_de_model = df60[de_cols_model].copy()
+    df_de_model = df_de_model[df_de_model.index >= "2018-10-01"]
 
     lag_vars = ["DE_LU_price_day_ahead", "DE_LU_load_actual_entsoe_transparency",
                 "DE_LU_solar_generation_actual", "DE_LU_wind_generation_actual"]
-    df = df_de.dropna(subset=lag_vars).copy()
+    df = df_de_model.dropna(subset=lag_vars).copy()
 
     # Feature engineering
     df["hour"] = df.index.hour
@@ -402,22 +408,10 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         return fig
 
-    # Charger les données complètes pour avoir toutes les colonnes
-    @st.cache_data
-    def load_full_data():
-        df_full = pd.read_csv(
-            "opsd-time_series-2020-10-06/opsd-time_series-2020-10-06/time_series_60min_singleindex.csv",
-            parse_dates=['utc_timestamp'],
-            index_col='utc_timestamp'
-        )
-        return df_full[df_full.index >= "2018-10-01"]
-
-    df_full = load_full_data()
-
     with col1:
         st.markdown("**🌞 Production solaire**")
         fig_solar_dist = plot_variable_compact(
-            df_full,
+            df_de,
             "DE_LU_solar_generation_actual",
             "Solaire"
         )
@@ -426,7 +420,7 @@ if page == "📊 Analyse Exploratoire (AED)":
     with col2:
         st.markdown("**🌬️ Production éolienne**")
         fig_wind_dist = plot_variable_compact(
-            df_full,
+            df_de,
             "DE_LU_wind_generation_actual",
             "Éolien"
         )
