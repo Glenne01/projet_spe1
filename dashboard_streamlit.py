@@ -225,12 +225,12 @@ with st.spinner("🔄 Chargement des données..."):
 # ========================================
 
 st.markdown("""
-    <div style='text-align: center; padding: 10px 0;'>
-        <h1 style='color: #1D3557; font-size: 1.8em; margin-bottom: 5px;'>
+    <div style='text-align: center; padding: 5px 0; margin-bottom: 5px;'>
+        <h1 style='color: #1D3557; font-size: 1.4em; margin: 0; padding: 0;'>
             ⚡ Dashboard Prédiction Prix Day-Ahead DE-LU
         </h1>
-        <p style='color: #718096; font-size: 0.9em; margin-top: 0;'>
-            Allemagne-Luxembourg | Octobre 2018 - Septembre 2020
+        <p style='color: #718096; font-size: 0.75em; margin: 0; padding: 0;'>
+            Allemagne-Luxembourg | Oct 2018 - Sept 2020
         </p>
     </div>
 """, unsafe_allow_html=True)
@@ -417,7 +417,13 @@ else:  # page == "🤖 Prédictions ML"
 
     model_choice = st.sidebar.radio(
         "Modèle",
-        ["XGBoost", "Random Forest", "Baseline Naïve"]
+        ["XGBoost", "Random Forest"]
+    )
+
+    # Filtre par année
+    year_choice = st.sidebar.radio(
+        "Année",
+        ["Toutes", "2020"]
     )
 
     # Extraction prédictions
@@ -425,27 +431,32 @@ else:  # page == "🤖 Prédictions ML"
     if model_choice == "XGBoost":
         y_pred = models['y_pred_xgb']
         feature_importance = models['feature_importance_xgb']
-    elif model_choice == "Random Forest":
+    else:  # Random Forest
         y_pred = models['y_pred_rf']
         feature_importance = models['feature_importance_rf']
+
+    # Filtre par année
+    if year_choice == "2020":
+        mask = y_test.index.year == 2020
+        y_test_filtered = y_test[mask]
+        y_pred_filtered = y_pred[mask]
     else:
-        y_pred = models['baseline_pred'].values
-        y_test = models['y_test_baseline']
-        feature_importance = None
+        y_test_filtered = y_test
+        y_pred_filtered = y_pred
 
     # Calcul métriques
-    errors = y_test.values - y_pred
+    errors = y_test_filtered.values - y_pred_filtered
     abs_errors = np.abs(errors)
-    mae = mean_absolute_error(y_test, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    r2 = r2_score(y_test, y_pred)
-    mape = np.mean(np.abs(errors / y_test.values)) * 100
+    mae = mean_absolute_error(y_test_filtered, y_pred_filtered)
+    rmse = np.sqrt(mean_squared_error(y_test_filtered, y_pred_filtered))
+    r2 = r2_score(y_test_filtered, y_pred_filtered)
+    mape = np.mean(np.abs(errors / y_test_filtered.values)) * 100
 
     # KPIs
     col1, col2, col3, col4, col5 = st.columns(5)
 
     kpis = [
-        (col1, "Prix Moyen", f"{y_test.mean():.2f}", "€/MWh"),
+        (col1, "Prix Moyen", f"{y_test_filtered.mean():.2f}", "€/MWh"),
         (col2, "MAE", f"{mae:.2f}", "€/MWh"),
         (col3, "RMSE", f"{rmse:.2f}", "€/MWh"),
         (col4, "R²", f"{r2:.3f}", ""),
@@ -469,17 +480,19 @@ else:  # page == "🤖 Prédictions ML"
 
     fig_pred = go.Figure()
     fig_pred.add_trace(go.Scatter(
-        x=y_test.index, y=y_test.values,
+        x=y_test_filtered.index, y=y_test_filtered.values,
         mode='lines', name='Réel',
         line=dict(color=COLORS['price_real'], width=2.5)
     ))
     fig_pred.add_trace(go.Scatter(
-        x=y_test.index, y=y_pred,
+        x=y_test_filtered.index, y=y_pred_filtered,
         mode='lines', name=f'Prédit ({model_choice})',
         line=dict(color=COLORS['price_pred'], width=2, dash='dot')
     ))
+
+    period_text = "2020" if year_choice == "2020" else "Juillet-Septembre 2020"
     fig_pred.update_layout(
-        title=f"Prédictions {model_choice} - Test (Juillet-Septembre 2020)",
+        title=f"Prédictions {model_choice} - {period_text}",
         xaxis_title="Date", yaxis_title="Prix (€/MWh)", height=500
     )
     fig_pred = apply_plotly_theme(fig_pred)
@@ -505,11 +518,11 @@ else:  # page == "🤖 Prédictions ML"
     with col2:
         fig_scatter = go.Figure()
         fig_scatter.add_trace(go.Scatter(
-            x=y_test, y=y_pred, mode='markers',
+            x=y_test_filtered, y=y_pred_filtered, mode='markers',
             marker=dict(color=abs_errors, colorscale='Reds', size=6, showscale=True)
         ))
-        min_val = min(y_test.min(), y_pred.min())
-        max_val = max(y_test.max(), y_pred.max())
+        min_val = min(y_test_filtered.min(), y_pred_filtered.min())
+        max_val = max(y_test_filtered.max(), y_pred_filtered.max())
         fig_scatter.add_trace(go.Scatter(
             x=[min_val, max_val], y=[min_val, max_val],
             mode='lines', line=dict(color='black', dash='dash'), showlegend=False
@@ -522,7 +535,7 @@ else:  # page == "🤖 Prédictions ML"
         st.plotly_chart(fig_scatter, use_container_width=True)
 
     # Feature importance
-    if model_choice != "Baseline Naïve" and feature_importance is not None:
+    if feature_importance is not None:
         st.markdown("<div class='section-header'>🎯 Variables Influentes</div>", unsafe_allow_html=True)
 
         top_n = st.slider("Nombre de variables", 10, 30, 15)
@@ -541,24 +554,34 @@ else:  # page == "🤖 Prédictions ML"
         fig_fi = apply_plotly_theme(fig_fi)
         st.plotly_chart(fig_fi, use_container_width=True)
 
-    # Comparaison modèles
-    st.markdown("<div class='section-header'>🔄 Comparaison des Modèles</div>", unsafe_allow_html=True)
+    # Comparaison des deux modèles
+    st.markdown("<div class='section-header'>🔄 Comparaison XGBoost vs Random Forest</div>", unsafe_allow_html=True)
 
     metrics_comparison = []
     for model_name, preds in [
         ("Random Forest", models['y_pred_rf']),
-        ("XGBoost", models['y_pred_xgb']),
-        ("Baseline Naïve", models['baseline_pred'].values)
+        ("XGBoost", models['y_pred_xgb'])
     ]:
-        y_true = models['y_test_baseline'] if model_name == "Baseline Naïve" else models['y_test']
-        mae_m = mean_absolute_error(y_true, preds)
-        rmse_m = np.sqrt(mean_squared_error(y_true, preds))
-        r2_m = r2_score(y_true, preds)
+        # Appliquer le filtre d'année
+        if year_choice == "2020":
+            mask = models['y_test'].index.year == 2020
+            y_true = models['y_test'][mask]
+            preds_filtered = preds[mask]
+        else:
+            y_true = models['y_test']
+            preds_filtered = preds
+
+        mae_m = mean_absolute_error(y_true, preds_filtered)
+        rmse_m = np.sqrt(mean_squared_error(y_true, preds_filtered))
+        r2_m = r2_score(y_true, preds_filtered)
+        mape_m = np.mean(np.abs((y_true.values - preds_filtered) / y_true.values)) * 100
+
         metrics_comparison.append({
             'Modèle': model_name,
             'MAE (€/MWh)': round(mae_m, 2),
             'RMSE (€/MWh)': round(rmse_m, 2),
-            'R²': round(r2_m, 3)
+            'R²': round(r2_m, 3),
+            'MAPE (%)': round(mape_m, 1)
         })
 
     df_comparison = pd.DataFrame(metrics_comparison)
