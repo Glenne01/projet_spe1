@@ -317,7 +317,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig_monthly_price = make_subplots(
             rows=3, cols=1,
-            subplot_titles=[f"Année {year}" for year in years],
+            subplot_titles=[f"{year}" for year in years],
             vertical_spacing=0.10
         )
 
@@ -338,10 +338,29 @@ if page == "📊 Analyse Exploratoire (AED)":
                 row=i, col=1
             )
 
-            fig_monthly_price.update_yaxes(title_text="€/MWh", row=i, col=1)
+            fig_monthly_price.update_yaxes(
+                title_text="€/MWh",
+                row=i, col=1,
+                title_font=dict(size=12, color='#1a202c'),
+                tickfont=dict(color='#1a202c', size=11)
+            )
+            fig_monthly_price.update_xaxes(
+                row=i, col=1,
+                tickfont=dict(color='#1a202c', size=10)
+            )
 
-        fig_monthly_price.update_layout(height=450, margin=dict(t=40, b=30, l=50, r=30))
-        fig_monthly_price = apply_plotly_theme(fig_monthly_price)
+        fig_monthly_price.update_layout(
+            height=450,
+            margin=dict(t=50, b=30, l=50, r=30),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(color='#1a202c', size=12)
+        )
+
+        # Mettre les titres des subplots en noir
+        for annotation in fig_monthly_price['layout']['annotations']:
+            annotation['font'] = dict(size=13, color='#1a202c', weight='bold')
+
         st.plotly_chart(fig_monthly_price, use_container_width=True)
 
     # LIGNE 2 : Production Solaire + Production Éolienne
@@ -354,7 +373,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig = make_subplots(
             rows=3, cols=1,
-            subplot_titles=[f"Année {year}" for year in years],
+            subplot_titles=[f"{year}" for year in years],
             vertical_spacing=0.10
         )
 
@@ -372,10 +391,10 @@ if page == "📊 Analyse Exploratoire (AED)":
                             x=df_month.index,
                             y=df_month[var_name],
                             mode='lines',
-                            name=f"M{month}",
+                            name=f"Mois {month}",
                             line=dict(color=color_str, width=1),
                             legendgroup=f"month{month}",
-                            showlegend=False
+                            showlegend=(idx == 1)
                         ),
                         row=idx, col=1
                     )
@@ -384,7 +403,7 @@ if page == "📊 Analyse Exploratoire (AED)":
                 title_text="MW",
                 row=idx, col=1,
                 title_font=dict(size=12, color='#1a202c'),
-                tickfont=dict(color='#1a202c'),
+                tickfont=dict(color='#1a202c', size=11),
                 linecolor='#1a202c',
                 tickcolor='#1a202c'
             )
@@ -397,14 +416,24 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig.update_layout(
             height=450,
-            margin=dict(t=40, b=30, l=60, r=20),
+            margin=dict(t=50, b=30, l=60, r=20),
             plot_bgcolor='white',
-            paper_bgcolor='white'
+            paper_bgcolor='white',
+            font=dict(color='#1a202c', size=12),
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="center",
+                x=0.5,
+                font=dict(color='#1a202c', size=10)
+            )
         )
 
         # Mettre les titres des subplots en noir
         for annotation in fig['layout']['annotations']:
-            annotation['font'] = dict(size=12, color='#1a202c')
+            annotation['font'] = dict(size=13, color='#1a202c', weight='bold')
 
         return fig
 
@@ -428,7 +457,27 @@ if page == "📊 Analyse Exploratoire (AED)":
 
     # LIGNE 3 : Heatmap de corrélation en pleine largeur
     st.markdown("**🔗 Matrice de corrélation des variables**")
-    corr_matrix = df_de_final.corr()
+
+    # Sélectionner uniquement les colonnes pour la heatmap comme dans le notebook
+    heatmap_cols = [
+        'DE_load_actual_entsoe_transparency',
+        'DE_load_forecast_entsoe_transparency',
+        'DE_solar_generation_actual',
+        'DE_wind_generation_actual',
+        'DE_wind_offshore_generation_actual',
+        'DE_wind_onshore_generation_actual',
+        'DE_LU_load_actual_entsoe_transparency',
+        'DE_LU_load_forecast_entsoe_transparency',
+        'DE_LU_solar_generation_actual',
+        'DE_LU_wind_generation_actual',
+        'DE_LU_wind_offshore_generation_actual',
+        'DE_LU_wind_onshore_generation_actual',
+        'DE_LU_price_day_ahead'
+    ]
+
+    # Vérifier quelles colonnes existent réellement
+    available_cols = [col for col in heatmap_cols if col in df_de_final.columns]
+    corr_matrix = df_de_final[available_cols].corr()
 
     fig_heatmap = go.Figure(data=go.Heatmap(
         z=corr_matrix.values,
@@ -438,18 +487,19 @@ if page == "📊 Analyse Exploratoire (AED)":
         zmid=0,
         text=np.round(corr_matrix.values, 2),
         texttemplate='%{text}',
-        textfont={"size": 10},
-        colorbar=dict(title="Corrélation")
+        textfont={"size": 9, "color": "#1a202c"},
+        colorbar=dict(title="Corrélation", titlefont=dict(color='#1a202c'), tickfont=dict(color='#1a202c'))
     ))
 
     fig_heatmap.update_layout(
-        title="Corrélation des variables DE-LU",
+        title=dict(text="Corrélation des variables DE-LU", font=dict(size=16, color='#1a202c')),
         height=600,
-        xaxis={'side': 'bottom', 'tickfont': {'size': 11}, 'tickangle': 45},
-        yaxis={'side': 'left', 'tickfont': {'size': 11}},
-        margin=dict(t=60, b=100, l=200, r=50)
+        xaxis={'side': 'bottom', 'tickfont': {'size': 10, 'color': '#1a202c'}, 'tickangle': 45},
+        yaxis={'side': 'left', 'tickfont': {'size': 10, 'color': '#1a202c'}},
+        margin=dict(t=60, b=150, l=220, r=50),
+        plot_bgcolor='white',
+        paper_bgcolor='white'
     )
-    fig_heatmap = apply_plotly_theme(fig_heatmap)
     st.plotly_chart(fig_heatmap, use_container_width=True)
 
 # ========================================
