@@ -380,36 +380,30 @@ if page == "📊 Analyse Exploratoire (AED)":
         fig.update_layout(height=450, margin=dict(t=40, b=30, l=60, r=20))
         return apply_plotly_theme(fig)
 
+    # Préparation des données avec les bonnes colonnes
+    df_de_raw = pd.read_csv(
+        "opsd-time_series-2020-10-06/opsd-time_series-2020-10-06/time_series_60min_singleindex.csv",
+        parse_dates=['utc_timestamp'],
+        index_col='utc_timestamp'
+    )
+    df_de_raw = df_de_raw[df_de_raw.index >= "2018-10-01"]
+
     with col1:
         st.markdown("**🌞 Production solaire**")
-        # Vérifier si la colonne existe, sinon utiliser les colonnes disponibles
-        solar_col = None
-        for col in df_de.columns:
-            if 'solar' in col.lower():
-                solar_col = col
-                break
-
-        if solar_col:
+        if "DE_solar_generation_actual" in df_de_raw.columns:
             fig_solar_dist = plot_variable_compact(
-                df_de,
-                solar_col,
+                df_de_raw,
+                "DE_solar_generation_actual",
                 "Solaire"
             )
             st.plotly_chart(fig_solar_dist, use_container_width=True)
 
     with col2:
         st.markdown("**🌬️ Production éolienne**")
-        # Vérifier si la colonne existe
-        wind_col = None
-        for col in df_de.columns:
-            if 'wind' in col.lower() and 'generation' in col.lower():
-                wind_col = col
-                break
-
-        if wind_col:
+        if "DE_wind_generation_actual" in df_de_raw.columns:
             fig_wind_dist = plot_variable_compact(
-                df_de,
-                wind_col,
+                df_de_raw,
+                "DE_wind_generation_actual",
                 "Éolien"
             )
             st.plotly_chart(fig_wind_dist, use_container_width=True)
