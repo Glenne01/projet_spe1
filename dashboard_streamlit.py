@@ -592,36 +592,64 @@ else:  # page == "Prédictions ML"
         y_test_filtered = y_test
         y_pred_filtered = y_pred
 
-    # Calcul métriques
+    # Calcul métriques détaillées
     errors = y_test_filtered.values - y_pred_filtered
     abs_errors = np.abs(errors)
     mae = mean_absolute_error(y_test_filtered, y_pred_filtered)
     rmse = np.sqrt(mean_squared_error(y_test_filtered, y_pred_filtered))
+    mse = mean_squared_error(y_test_filtered, y_pred_filtered)
     r2 = r2_score(y_test_filtered, y_pred_filtered)
     mape = np.mean(np.abs(errors / y_test_filtered.values)) * 100
+    biais = np.mean(errors)  # Biais moyen
+    ecart_type = np.std(errors)  # Écart-type des erreurs
 
-    # KPIs
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    kpis = [
-        (col1, "Prix Moyen", f"{y_test_filtered.mean():.2f}", "€/MWh"),
-        (col2, "MAE", f"{mae:.2f}", "€/MWh"),
-        (col3, "RMSE", f"{rmse:.2f}", "€/MWh"),
-        (col4, "R²", f"{r2:.3f}", ""),
-        (col5, "MAPE", f"{mape:.1f}", "%")
-    ]
-
-    for col, title, value, subtitle in kpis:
-        with col:
-            st.markdown(f"""
-            <div class='kpi-card'>
-                <div class='kpi-title'>{title}</div>
-                <div class='kpi-value'>{value}</div>
-                <div class='kpi-subtitle'>{subtitle}</div>
+    # KPIs compacts
+    st.markdown(f"""
+        <div style='background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);'>
+            <h3 style='color: #0077B6; margin-top: 0; margin-bottom: 15px; font-size: 1.1em;'>
+                📊 Métriques du modèle {model_choice}
+            </h3>
+            <div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;'>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>MAE</div>
+                    <div style='color: #0077B6; font-size: 1.5em; font-weight: 700;'>{mae:.2f}</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'>€/MWh</div>
+                </div>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>RMSE</div>
+                    <div style='color: #0077B6; font-size: 1.5em; font-weight: 700;'>{rmse:.2f}</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'>€/MWh</div>
+                </div>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>R²</div>
+                    <div style='color: #0077B6; font-size: 1.5em; font-weight: 700;'>{r2:.3f}</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'></div>
+                </div>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>MAPE</div>
+                    <div style='color: #0077B6; font-size: 1.5em; font-weight: 700;'>{mape:.1f}%</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'></div>
+                </div>
             </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
+            <div style='display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;'>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>Biais</div>
+                    <div style='color: {"#198754" if abs(biais) < 1 else "#0077B6"}; font-size: 1.3em; font-weight: 700;'>{biais:.2f}</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'>€/MWh</div>
+                </div>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>Écart-type</div>
+                    <div style='color: #0077B6; font-size: 1.3em; font-weight: 700;'>{ecart_type:.2f}</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'>€/MWh</div>
+                </div>
+                <div style='text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;'>
+                    <div style='color: #6c757d; font-size: 0.75em; font-weight: 600; text-transform: uppercase; margin-bottom: 5px;'>Prix Moyen</div>
+                    <div style='color: #0077B6; font-size: 1.3em; font-weight: 700;'>{y_test_filtered.mean():.2f}</div>
+                    <div style='color: #6c757d; font-size: 0.7em;'>€/MWh</div>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
     # Graphique prédictions
     st.markdown("<div class='section-header'>📈 Prédictions vs Réalité</div>", unsafe_allow_html=True)
