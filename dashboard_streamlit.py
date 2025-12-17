@@ -262,21 +262,66 @@ st.markdown("""
 # SIDEBAR - NAVIGATION
 # ========================================
 
-st.sidebar.markdown("<h2 style='color: #0077B6;'>📋 Navigation</h2>", unsafe_allow_html=True)
+st.sidebar.markdown("""
+    <div style='background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                text-align: center;'>
+        <h2 style='color: white; margin: 0; font-size: 1.3em; font-weight: 700;'>
+            Navigation
+        </h2>
+    </div>
+""", unsafe_allow_html=True)
+
+# Style personnalisé pour les boutons radio
+st.sidebar.markdown("""
+    <style>
+    div[data-testid="stSidebar"] .stRadio > label {
+        font-size: 0px !important;
+        height: 0px !important;
+    }
+    div[data-testid="stSidebar"] .stRadio > div {
+        gap: 10px;
+    }
+    div[data-testid="stSidebar"] .stRadio label {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #1a202c;
+        display: block;
+        margin-bottom: 8px;
+    }
+    div[data-testid="stSidebar"] .stRadio label:hover {
+        border-color: #0077B6;
+        background: #f0f9ff;
+        transform: translateX(5px);
+    }
+    div[data-testid="stSidebar"] .stRadio label[data-checked="true"] {
+        background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+        color: white;
+        border-color: #0077B6;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 page = st.sidebar.radio(
     "Sélectionner une page",
-    ["📊 Analyse Exploratoire (AED)", "🤖 Prédictions ML"],
+    ["Analyse Exploratoire", "Prédictions ML"],
     label_visibility="collapsed"
 )
 
-st.sidebar.markdown("---")
+st.sidebar.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
 # ========================================
 # PAGE 1 : ANALYSE EXPLORATOIRE
 # ========================================
 
-if page == "📊 Analyse Exploratoire (AED)":
+if page == "Analyse Exploratoire":
 
     # LIGNE 1 : Boxplot + Distribution Prix
     col1, col2 = st.columns([1, 1])
@@ -512,7 +557,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 # PAGE 2 : PRÉDICTIONS ML
 # ========================================
 
-else:  # page == "🤖 Prédictions ML"
+else:  # page == "Prédictions ML"
     st.markdown("<div class='section-header'>🤖 Prédictions Machine Learning</div>", unsafe_allow_html=True)
 
     # Sidebar filtres
