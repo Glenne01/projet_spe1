@@ -109,17 +109,17 @@ def load_data():
 
     # Garder toutes les colonnes DE et DE_LU pour l'AED
     de_cols_all = [c for c in df60.columns if c.startswith('DE_LU_') or c.startswith('DE_')]
-    df_de = df60[de_cols_all].copy()
-    df_de = df_de[df_de.index >= "2018-10-01"]
+    df_de_final = df60[de_cols_all].copy()
+    df_de_final = df_de_final[df_de_final.index >= "2018-10-01"]
 
     # Garder aussi seulement les colonnes DE_LU pour le modèle
     de_cols_model = [c for c in df60.columns if c.startswith('DE_LU_')]
-    df_de_model = df60[de_cols_model].copy()
-    df_de_model = df_de_model[df_de_model.index >= "2018-10-01"]
+    df_de = df60[de_cols_model].copy()
+    df_de = df_de[df_de.index >= "2018-10-01"]
 
     lag_vars = ["DE_LU_price_day_ahead", "DE_LU_load_actual_entsoe_transparency",
                 "DE_LU_solar_generation_actual", "DE_LU_wind_generation_actual"]
-    df = df_de_model.dropna(subset=lag_vars).copy()
+    df = df_de.dropna(subset=lag_vars).copy()
 
     # Feature engineering
     df["hour"] = df.index.hour
@@ -164,7 +164,7 @@ def load_data():
     df["target_price_24h"] = df["DE_LU_price_day_ahead"].shift(-24)
     df_model = df.dropna(subset=["target_price_24h"]).copy()
 
-    return df_model, df_de
+    return df_model, df_de_final
 
 def apply_plotly_theme(fig):
     """Applique le thème avec textes foncés"""
@@ -239,7 +239,7 @@ def train_models(df_model):
 
 # Chargement
 with st.spinner("🔄 Chargement des données..."):
-    df_model, df_de = load_data()
+    df_model, df_de_final = load_data()
     models = train_models(df_model)
 
 # ========================================
@@ -283,7 +283,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 
     with col1:
         st.markdown("**📦 Distribution demande électrique**")
-        df_de_copy = df_de.copy()
+        df_de_copy = df_de_final.copy()
         df_de_copy['month'] = df_de_copy.index.month
         df_de_copy['month_name'] = df_de_copy['month'].map({
             1: 'Jan', 2: 'Fév', 3: 'Mar', 4: 'Avr', 5: 'Mai', 6: 'Jun',
@@ -312,7 +312,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 
     with col2:
         st.markdown("**📊 Distribution mensuelle prix day-ahead**")
-        prices = df_de["DE_LU_price_day_ahead"]
+        prices = df_de_final["DE_LU_price_day_ahead"]
         years = [2018, 2019, 2020]
 
         fig_monthly_price = make_subplots(
@@ -383,7 +383,7 @@ if page == "📊 Analyse Exploratoire (AED)":
             fig.update_yaxes(
                 title_text="MW",
                 row=idx, col=1,
-                titlefont=dict(size=12, color='#1a202c'),
+                title_font=dict(size=12, color='#1a202c'),
                 tickfont=dict(color='#1a202c'),
                 linecolor='#1a202c',
                 tickcolor='#1a202c'
@@ -411,8 +411,8 @@ if page == "📊 Analyse Exploratoire (AED)":
     with col1:
         st.markdown("**🌞 Production solaire**")
         fig_solar_dist = plot_variable_compact(
-            df_de,
-            "DE_LU_solar_generation_actual",
+            df_de_final,
+            "DE_solar_generation_actual",
             "Solaire"
         )
         st.plotly_chart(fig_solar_dist, use_container_width=True)
@@ -420,15 +420,15 @@ if page == "📊 Analyse Exploratoire (AED)":
     with col2:
         st.markdown("**🌬️ Production éolienne**")
         fig_wind_dist = plot_variable_compact(
-            df_de,
-            "DE_LU_wind_generation_actual",
+            df_de_final,
+            "DE_wind_generation_actual",
             "Éolien"
         )
         st.plotly_chart(fig_wind_dist, use_container_width=True)
 
     # LIGNE 3 : Heatmap de corrélation en pleine largeur
     st.markdown("**🔗 Matrice de corrélation des variables**")
-    corr_matrix = df_de.corr()
+    corr_matrix = df_de_final.corr()
 
     fig_heatmap = go.Figure(data=go.Heatmap(
         z=corr_matrix.values,
