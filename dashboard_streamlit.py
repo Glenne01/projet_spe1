@@ -640,7 +640,7 @@ else:  # page == "Prédictions ML"
     fig_pred.add_trace(go.Scatter(
         x=y_test_filtered.index, y=y_pred_filtered,
         mode='lines', name=f'Prédit ({model_choice})',
-        line=dict(color=COLORS['price_pred'], width=2, dash='dot')
+        line=dict(color='#E63946', width=2.5)
     ))
 
     period_text = "2020" if year_choice == "2020" else "Juillet-Septembre 2020"
