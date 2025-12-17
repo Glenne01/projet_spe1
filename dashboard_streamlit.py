@@ -275,11 +275,11 @@ if page == "📊 Analyse Exploratoire (AED)":
             ))
 
         fig_boxplot.update_layout(
-            yaxis_title="MW",
-            xaxis_title="",
-            height=350,
+            yaxis_title="Demande (MW)",
+            xaxis_title="Mois",
+            height=450,
             showlegend=False,
-            margin=dict(t=10, b=10, l=10, r=10)
+            margin=dict(t=30, b=50, l=60, r=30)
         )
         fig_boxplot = apply_plotly_theme(fig_boxplot)
         st.plotly_chart(fig_boxplot, use_container_width=True)
@@ -291,15 +291,16 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig_monthly_price = make_subplots(
             rows=3, cols=1,
-            subplot_titles=[f"{year}" for year in years],
-            vertical_spacing=0.15
+            subplot_titles=[f"Année {year}" for year in years],
+            vertical_spacing=0.10
         )
 
         for i, year in enumerate(years, 1):
             df_year = prices[str(year)]
             monthly_mean = df_year.groupby(df_year.index.month).mean()
 
-            month_names = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]
+            month_names = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
+                           "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
 
             fig_monthly_price.add_trace(
                 go.Bar(
@@ -313,7 +314,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 
             fig_monthly_price.update_yaxes(title_text="€/MWh", row=i, col=1)
 
-        fig_monthly_price.update_layout(height=350, margin=dict(t=20, b=10, l=10, r=10))
+        fig_monthly_price.update_layout(height=450, margin=dict(t=40, b=30, l=50, r=30))
         fig_monthly_price = apply_plotly_theme(fig_monthly_price)
         st.plotly_chart(fig_monthly_price, use_container_width=True)
 
@@ -327,8 +328,8 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig = make_subplots(
             rows=3, cols=1,
-            subplot_titles=[f"{year}" for year in years],
-            vertical_spacing=0.15
+            subplot_titles=[f"Année {year}" for year in years],
+            vertical_spacing=0.10
         )
 
         for idx, year in enumerate(years, 1):
@@ -346,7 +347,7 @@ if page == "📊 Analyse Exploratoire (AED)":
                             y=df_month[var_name],
                             mode='lines',
                             name=f"M{month}",
-                            line=dict(color=color_str, width=0.5),
+                            line=dict(color=color_str, width=1),
                             legendgroup=f"month{month}",
                             showlegend=False
                         ),
@@ -355,7 +356,7 @@ if page == "📊 Analyse Exploratoire (AED)":
 
             fig.update_yaxes(title_text="MW", row=idx, col=1)
 
-        fig.update_layout(height=350, margin=dict(t=20, b=10, l=10, r=10))
+        fig.update_layout(height=450, margin=dict(t=40, b=30, l=50, r=20))
         return apply_plotly_theme(fig)
 
     with col1:
@@ -388,15 +389,15 @@ if page == "📊 Analyse Exploratoire (AED)":
             zmid=0,
             text=np.round(corr_matrix.values, 2),
             texttemplate='%{text}',
-            textfont={"size": 6},
+            textfont={"size": 8},
             colorbar=dict(title="Corr")
         ))
 
         fig_heatmap.update_layout(
-            height=350,
-            xaxis={'side': 'bottom', 'tickfont': {'size': 6}},
-            yaxis={'side': 'left', 'tickfont': {'size': 6}},
-            margin=dict(t=10, b=10, l=10, r=10)
+            height=450,
+            xaxis={'side': 'bottom', 'tickfont': {'size': 8}},
+            yaxis={'side': 'left', 'tickfont': {'size': 8}},
+            margin=dict(t=30, b=40, l=40, r=40)
         )
         fig_heatmap = apply_plotly_theme(fig_heatmap)
         st.plotly_chart(fig_heatmap, use_container_width=True)
