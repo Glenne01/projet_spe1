@@ -568,12 +568,6 @@ else:  # page == "Prédictions ML"
         ["XGBoost", "Random Forest"]
     )
 
-    # Filtre par année (uniquement période de test : Juillet-Septembre 2020)
-    year_choice = st.sidebar.radio(
-        "Période",
-        ["Juillet-Septembre 2020"]
-    )
-
     # Extraction prédictions
     y_test = models['y_test']
     if model_choice == "XGBoost":
