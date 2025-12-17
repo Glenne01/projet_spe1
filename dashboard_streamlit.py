@@ -318,7 +318,7 @@ if page == "📊 Analyse Exploratoire (AED)":
         fig_monthly_price = make_subplots(
             rows=3, cols=1,
             subplot_titles=[f"{year}" for year in years],
-            vertical_spacing=0.10
+            vertical_spacing=0.12
         )
 
         for i, year in enumerate(years, 1):
@@ -357,9 +357,10 @@ if page == "📊 Analyse Exploratoire (AED)":
             font=dict(color='#1a202c', size=12)
         )
 
-        # Mettre les titres des subplots en noir
+        # Mettre les titres des subplots en noir et ajuster la position
         for annotation in fig_monthly_price['layout']['annotations']:
             annotation['font'] = dict(size=13, color='#1a202c', weight='bold')
+            annotation['y'] = annotation['y'] - 0.02  # Abaisser un peu l'année
 
         st.plotly_chart(fig_monthly_price, use_container_width=True)
 
@@ -374,7 +375,7 @@ if page == "📊 Analyse Exploratoire (AED)":
         fig = make_subplots(
             rows=3, cols=1,
             subplot_titles=[f"{year}" for year in years],
-            vertical_spacing=0.10
+            vertical_spacing=0.12
         )
 
         for idx, year in enumerate(years, 1):
@@ -431,9 +432,10 @@ if page == "📊 Analyse Exploratoire (AED)":
             )
         )
 
-        # Mettre les titres des subplots en noir
+        # Mettre les titres des subplots en noir et ajuster la position
         for annotation in fig['layout']['annotations']:
             annotation['font'] = dict(size=13, color='#1a202c', weight='bold')
+            annotation['y'] = annotation['y'] - 0.02  # Abaisser un peu l'année
 
         return fig
 
@@ -488,7 +490,10 @@ if page == "📊 Analyse Exploratoire (AED)":
         text=np.round(corr_matrix.values, 2),
         texttemplate='%{text}',
         textfont={"size": 9, "color": "#1a202c"},
-        colorbar=dict(title="Corrélation", titlefont=dict(color='#1a202c'), tickfont=dict(color='#1a202c'))
+        colorbar=dict(
+            title=dict(text="Corrélation", font=dict(color='#1a202c', size=12)),
+            tickfont=dict(color='#1a202c', size=10)
+        )
     ))
 
     fig_heatmap.update_layout(
