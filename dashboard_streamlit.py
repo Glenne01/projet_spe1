@@ -280,7 +280,7 @@ if page == "📊 Analyse Exploratoire (AED)":
         title="Distribution de la demande électrique par mois",
         yaxis_title="Demande (MW)",
         xaxis_title="Mois",
-        height=450,
+        height=280,
         showlegend=False
     )
     fig_boxplot = apply_plotly_theme(fig_boxplot)
@@ -295,7 +295,7 @@ if page == "📊 Analyse Exploratoire (AED)":
     fig_monthly_price = make_subplots(
         rows=3, cols=1,
         subplot_titles=[f"Moyenne mensuelle du prix — {year}" for year in years],
-        vertical_spacing=0.08
+        vertical_spacing=0.12
     )
 
     for i, year in enumerate(years, 1):
@@ -317,12 +317,15 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig_monthly_price.update_yaxes(title_text="€/MWh", row=i, col=1)
 
-    fig_monthly_price.update_layout(height=800)
+    fig_monthly_price.update_layout(height=400)
     fig_monthly_price = apply_plotly_theme(fig_monthly_price)
     st.plotly_chart(fig_monthly_price, use_container_width=True)
 
     # 3. COMPARAISON DES DISTRIBUTIONS DE PRODUCTION (Solaire et Éolien)
     st.markdown("### 🌞🌬️ Comparaison des distributions de production")
+
+    # Mettre les 2 graphiques côte à côte pour gagner de l'espace
+    col1, col2 = st.columns(2)
 
     # Fonction pour créer le graphique par variable
     def plot_variable_monthly_by_year(df, var_name, var_label):
@@ -331,8 +334,8 @@ if page == "📊 Analyse Exploratoire (AED)":
 
         fig = make_subplots(
             rows=3, cols=1,
-            subplot_titles=[f"{var_label} — évolution journalière colorée par mois ({year})" for year in years],
-            vertical_spacing=0.08
+            subplot_titles=[f"{var_label} — {year}" for year in years],
+            vertical_spacing=0.12
         )
 
         for idx, year in enumerate(years, 1):
@@ -350,7 +353,7 @@ if page == "📊 Analyse Exploratoire (AED)":
                             y=df_month[var_name],
                             mode='lines',
                             name=f"M{month}",
-                            line=dict(color=color_str, width=1),
+                            line=dict(color=color_str, width=0.8),
                             legendgroup=f"month{month}",
                             showlegend=(idx == 1)
                         ),
@@ -359,24 +362,26 @@ if page == "📊 Analyse Exploratoire (AED)":
 
             fig.update_yaxes(title_text=var_label, row=idx, col=1)
 
-        fig.update_layout(height=900, hovermode='x unified')
+        fig.update_layout(height=450, hovermode='x unified')
         return apply_plotly_theme(fig)
 
     # Production Solaire
-    fig_solar_dist = plot_variable_monthly_by_year(
-        df_de,
-        "DE_LU_solar_generation_actual",
-        "Production solaire (MW)"
-    )
-    st.plotly_chart(fig_solar_dist, use_container_width=True)
+    with col1:
+        fig_solar_dist = plot_variable_monthly_by_year(
+            df_de,
+            "DE_LU_solar_generation_actual",
+            "Production solaire (MW)"
+        )
+        st.plotly_chart(fig_solar_dist, use_container_width=True)
 
     # Production Éolienne
-    fig_wind_dist = plot_variable_monthly_by_year(
-        df_de,
-        "DE_LU_wind_generation_actual",
-        "Production éolienne totale (MW)"
-    )
-    st.plotly_chart(fig_wind_dist, use_container_width=True)
+    with col2:
+        fig_wind_dist = plot_variable_monthly_by_year(
+            df_de,
+            "DE_LU_wind_generation_actual",
+            "Production éolienne totale (MW)"
+        )
+        st.plotly_chart(fig_wind_dist, use_container_width=True)
 
     # 4. HEATMAP - Corrélation
     st.markdown("### 🔗 Heatmap : Corrélation des variables")
@@ -392,13 +397,13 @@ if page == "📊 Analyse Exploratoire (AED)":
         zmid=0,
         text=np.round(corr_matrix.values, 2),
         texttemplate='%{text}',
-        textfont={"size": 9},
+        textfont={"size": 8},
         colorbar=dict(title="Corrélation")
     ))
 
     fig_heatmap.update_layout(
         title="Corrélation des variables DE-LU",
-        height=700,
+        height=450,
         xaxis={'side': 'bottom'},
         yaxis={'side': 'left'}
     )
