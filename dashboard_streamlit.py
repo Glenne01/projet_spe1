@@ -225,17 +225,15 @@ with st.spinner("🔄 Chargement des données..."):
 # ========================================
 
 st.markdown("""
-    <div style='text-align: center; padding: 20px 0;'>
-        <h1 style='color: #1D3557; font-size: 2.5em;'>
+    <div style='text-align: center; padding: 10px 0;'>
+        <h1 style='color: #1D3557; font-size: 1.8em; margin-bottom: 5px;'>
             ⚡ Dashboard Prédiction Prix Day-Ahead DE-LU
         </h1>
-        <p style='color: #718096; font-size: 1.1em;'>
+        <p style='color: #718096; font-size: 0.9em; margin-top: 0;'>
             Allemagne-Luxembourg | Octobre 2018 - Septembre 2020
         </p>
     </div>
 """, unsafe_allow_html=True)
-
-st.markdown("---")
 
 # ========================================
 # SIDEBAR - NAVIGATION
@@ -258,199 +256,154 @@ st.sidebar.markdown("---")
 if page == "📊 Analyse Exploratoire (AED)":
     st.markdown("<div class='section-header'>📊 Analyse Exploratoire des Données</div>", unsafe_allow_html=True)
 
-    # KPIs Générales
-    col1, col2, col3, col4 = st.columns(4)
+    # 1. BOXPLOT - Distribution de la demande électrique par mois
+    st.markdown("### 📦 Boxplot : Distribution de la demande électrique")
 
-    with col1:
-        st.markdown(f"""
-        <div class='kpi-card'>
-            <div class='kpi-title'>Période</div>
-            <div class='kpi-value'>2 ans</div>
-            <div class='kpi-subtitle'>Oct 2018 - Sept 2020</div>
-        </div>
-        """, unsafe_allow_html=True)
+    df_de_copy = df_de.copy()
+    df_de_copy['month'] = df_de_copy.index.month
+    df_de_copy['month_name'] = df_de_copy['month'].map({
+        1: 'Jan', 2: 'Fév', 3: 'Mar', 4: 'Avr', 5: 'Mai', 6: 'Jun',
+        7: 'Jul', 8: 'Aoû', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Déc'
+    })
 
-    with col2:
-        st.markdown(f"""
-        <div class='kpi-card'>
-            <div class='kpi-title'>Points de données</div>
-            <div class='kpi-value'>{len(df_model):,}</div>
-            <div class='kpi-subtitle'>Heures</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col3:
-        prix_moyen = df_de["DE_LU_price_day_ahead"].mean()
-        st.markdown(f"""
-        <div class='kpi-card'>
-            <div class='kpi-title'>Prix Moyen</div>
-            <div class='kpi-value'>{prix_moyen:.2f}</div>
-            <div class='kpi-subtitle'>€/MWh</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col4:
-        st.markdown(f"""
-        <div class='kpi-card'>
-            <div class='kpi-title'>Features</div>
-            <div class='kpi-value'>{len(models['features'])}</div>
-            <div class='kpi-subtitle'>Variables</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # Évolution du prix
-    st.markdown("<div class='section-header'>📈 Évolution du Prix Day-Ahead</div>", unsafe_allow_html=True)
-
-    fig_price = go.Figure()
-    fig_price.add_trace(go.Scatter(
-        x=df_de.index, y=df_de["DE_LU_price_day_ahead"],
-        mode='lines', name='Prix',
-        line=dict(color=COLORS['price_real'], width=1.5)
-    ))
-    fig_price.update_layout(
-        title="Prix Day-Ahead DE-LU (2018-2020)",
-        xaxis_title="Date", yaxis_title="Prix (€/MWh)", height=400
-    )
-    fig_price = apply_plotly_theme(fig_price)
-    st.plotly_chart(fig_price, use_container_width=True)
-
-    # Production Solaire & Éolienne
-    st.markdown("<div class='section-header'>🌞🌬️ Production Renouvelable</div>", unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        fig_solar = go.Figure()
-        fig_solar.add_trace(go.Scatter(
-            x=df_de.index, y=df_de["DE_LU_solar_generation_actual"],
-            mode='lines', name='Solaire',
-            line=dict(color=COLORS['solar'], width=1)
-        ))
-        fig_solar.update_layout(
-            title="Production Solaire", xaxis_title="Date",
-            yaxis_title="MW", height=350
-        )
-        fig_solar = apply_plotly_theme(fig_solar)
-        st.plotly_chart(fig_solar, use_container_width=True)
-
-    with col2:
-        fig_wind = go.Figure()
-        fig_wind.add_trace(go.Scatter(
-            x=df_de.index, y=df_de["DE_LU_wind_generation_actual"],
-            mode='lines', name='Éolien',
-            line=dict(color=COLORS['wind'], width=1)
-        ))
-        fig_wind.update_layout(
-            title="Production Éolienne", xaxis_title="Date",
-            yaxis_title="MW", height=350
-        )
-        fig_wind = apply_plotly_theme(fig_wind)
-        st.plotly_chart(fig_wind, use_container_width=True)
-
-    # Charge & Onshore/Offshore
-    col1, col2 = st.columns(2)
-
-    with col1:
-        fig_load = go.Figure()
-        fig_load.add_trace(go.Scatter(
-            x=df_de.index, y=df_de["DE_LU_load_actual_entsoe_transparency"],
-            mode='lines', name='Charge', line=dict(color=COLORS['primary'], width=1)
-        ))
-        fig_load.update_layout(
-            title="Charge Réelle", xaxis_title="Date",
-            yaxis_title="MW", height=350
-        )
-        fig_load = apply_plotly_theme(fig_load)
-        st.plotly_chart(fig_load, use_container_width=True)
-
-    with col2:
-        fig_wind_types = go.Figure()
-        fig_wind_types.add_trace(go.Scatter(
-            x=df_de.index, y=df_de["DE_LU_wind_onshore_generation_actual"],
-            mode='lines', name='Onshore', line=dict(color='#2A9D8F', width=1)
-        ))
-        fig_wind_types.add_trace(go.Scatter(
-            x=df_de.index, y=df_de["DE_LU_wind_offshore_generation_actual"],
-            mode='lines', name='Offshore', line=dict(color='#264653', width=1)
-        ))
-        fig_wind_types.update_layout(
-            title="Éolien Onshore vs Offshore", xaxis_title="Date",
-            yaxis_title="MW", height=350
-        )
-        fig_wind_types = apply_plotly_theme(fig_wind_types)
-        st.plotly_chart(fig_wind_types, use_container_width=True)
-
-    # Saisonnalité du prix
-    st.markdown("<div class='section-header'>📅 Saisonnalité du Prix</div>", unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # Prix moyen par heure
-        hourly_mean = df_de.groupby(df_de.index.hour)["DE_LU_price_day_ahead"].mean()
-        fig_hour = go.Figure()
-        fig_hour.add_trace(go.Bar(
-            x=hourly_mean.index, y=hourly_mean.values,
+    fig_boxplot = go.Figure()
+    for month in range(1, 13):
+        month_data = df_de_copy[df_de_copy['month'] == month]
+        month_name = month_data['month_name'].iloc[0] if len(month_data) > 0 else ''
+        fig_boxplot.add_trace(go.Box(
+            y=month_data["DE_LU_load_actual_entsoe_transparency"],
+            name=month_name,
             marker_color=COLORS['primary']
         ))
-        fig_hour.update_layout(
-            title="Prix Moyen par Heure", xaxis_title="Heure",
-            yaxis_title="Prix (€/MWh)", height=350
-        )
-        fig_hour = apply_plotly_theme(fig_hour)
-        st.plotly_chart(fig_hour, use_container_width=True)
 
-    with col2:
-        # Prix moyen par mois
-        monthly_mean = df_de.groupby(df_de.index.month)["DE_LU_price_day_ahead"].mean()
-        months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
-                  'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
-        fig_month = go.Figure()
-        fig_month.add_trace(go.Bar(
-            x=[months[i-1] for i in monthly_mean.index], y=monthly_mean.values,
-            marker_color=COLORS['solar']
-        ))
-        fig_month.update_layout(
-            title="Prix Moyen par Mois", xaxis_title="Mois",
-            yaxis_title="Prix (€/MWh)", height=350
-        )
-        fig_month = apply_plotly_theme(fig_month)
-        st.plotly_chart(fig_month, use_container_width=True)
-
-    # Distribution du prix
-    st.markdown("<div class='section-header'>📊 Distribution du Prix</div>", unsafe_allow_html=True)
-
-    fig_dist = go.Figure()
-    fig_dist.add_trace(go.Histogram(
-        x=df_de["DE_LU_price_day_ahead"], nbinsx=50,
-        marker_color=COLORS['primary']
-    ))
-    fig_dist.update_layout(
-        title="Distribution du Prix Day-Ahead",
-        xaxis_title="Prix (€/MWh)", yaxis_title="Fréquence", height=400
+    fig_boxplot.update_layout(
+        title="Distribution de la demande électrique par mois",
+        yaxis_title="Demande (MW)",
+        xaxis_title="Mois",
+        height=450,
+        showlegend=False
     )
-    fig_dist = apply_plotly_theme(fig_dist)
-    st.plotly_chart(fig_dist, use_container_width=True)
+    fig_boxplot = apply_plotly_theme(fig_boxplot)
+    st.plotly_chart(fig_boxplot, use_container_width=True)
 
-    # Corrélation
-    st.markdown("<div class='section-header'>🔗 Corrélations</div>", unsafe_allow_html=True)
+    # 2. DISTRIBUTION MENSUELLE DU PRIX - Bar chart par année (comme dans le notebook)
+    st.markdown("### 📊 Distribution mensuelle du prix day-ahead")
 
-    corr_vars = ['DE_LU_price_day_ahead', 'DE_LU_load_actual_entsoe_transparency',
-                 'DE_LU_solar_generation_actual', 'DE_LU_wind_generation_actual']
-    corr_matrix = df_de[corr_vars].corr()
+    prices = df_de["DE_LU_price_day_ahead"]
+    years = [2018, 2019, 2020]
 
-    fig_corr = go.Figure(data=go.Heatmap(
-        z=corr_matrix.values, x=corr_vars, y=corr_vars,
-        colorscale='RdBu', zmid=0, text=np.round(corr_matrix.values, 2),
-        texttemplate='%{text}', textfont={"size": 12}
-    ))
-    fig_corr.update_layout(
-        title="Matrice de Corrélation", height=500
+    fig_monthly_price = make_subplots(
+        rows=3, cols=1,
+        subplot_titles=[f"Moyenne mensuelle du prix — {year}" for year in years],
+        vertical_spacing=0.08
     )
-    fig_corr = apply_plotly_theme(fig_corr)
-    st.plotly_chart(fig_corr, use_container_width=True)
+
+    for i, year in enumerate(years, 1):
+        df_year = prices[str(year)]
+        monthly_mean = df_year.groupby(df_year.index.month).mean()
+
+        month_names = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
+                       "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
+
+        fig_monthly_price.add_trace(
+            go.Bar(
+                x=[month_names[m-1] for m in monthly_mean.index],
+                y=monthly_mean.values,
+                marker_color='skyblue',
+                showlegend=False
+            ),
+            row=i, col=1
+        )
+
+        fig_monthly_price.update_yaxes(title_text="€/MWh", row=i, col=1)
+
+    fig_monthly_price.update_layout(height=800)
+    fig_monthly_price = apply_plotly_theme(fig_monthly_price)
+    st.plotly_chart(fig_monthly_price, use_container_width=True)
+
+    # 3. COMPARAISON DES DISTRIBUTIONS DE PRODUCTION (Solaire et Éolien)
+    st.markdown("### 🌞🌬️ Comparaison des distributions de production")
+
+    # Fonction pour créer le graphique par variable
+    def plot_variable_monthly_by_year(df, var_name, var_label):
+        years = [2018, 2019, 2020]
+        colors_palette = plt.cm.tab20(np.linspace(0, 1, 12))
+
+        fig = make_subplots(
+            rows=3, cols=1,
+            subplot_titles=[f"{var_label} — évolution journalière colorée par mois ({year})" for year in years],
+            vertical_spacing=0.08
+        )
+
+        for idx, year in enumerate(years, 1):
+            df_year = df[df.index.year == year]
+
+            for month in range(1, 13):
+                df_month = df_year[df_year.index.month == month]
+                if len(df_month) > 0:
+                    color_rgb = colors_palette[month-1]
+                    color_str = f'rgb({int(color_rgb[0]*255)},{int(color_rgb[1]*255)},{int(color_rgb[2]*255)})'
+
+                    fig.add_trace(
+                        go.Scatter(
+                            x=df_month.index,
+                            y=df_month[var_name],
+                            mode='lines',
+                            name=f"M{month}",
+                            line=dict(color=color_str, width=1),
+                            legendgroup=f"month{month}",
+                            showlegend=(idx == 1)
+                        ),
+                        row=idx, col=1
+                    )
+
+            fig.update_yaxes(title_text=var_label, row=idx, col=1)
+
+        fig.update_layout(height=900, hovermode='x unified')
+        return apply_plotly_theme(fig)
+
+    # Production Solaire
+    fig_solar_dist = plot_variable_monthly_by_year(
+        df_de,
+        "DE_LU_solar_generation_actual",
+        "Production solaire (MW)"
+    )
+    st.plotly_chart(fig_solar_dist, use_container_width=True)
+
+    # Production Éolienne
+    fig_wind_dist = plot_variable_monthly_by_year(
+        df_de,
+        "DE_LU_wind_generation_actual",
+        "Production éolienne totale (MW)"
+    )
+    st.plotly_chart(fig_wind_dist, use_container_width=True)
+
+    # 4. HEATMAP - Corrélation
+    st.markdown("### 🔗 Heatmap : Corrélation des variables")
+
+    # Utiliser toutes les colonnes de df_de pour la corrélation
+    corr_matrix = df_de.corr()
+
+    fig_heatmap = go.Figure(data=go.Heatmap(
+        z=corr_matrix.values,
+        x=corr_matrix.columns,
+        y=corr_matrix.columns,
+        colorscale='RdBu',
+        zmid=0,
+        text=np.round(corr_matrix.values, 2),
+        texttemplate='%{text}',
+        textfont={"size": 9},
+        colorbar=dict(title="Corrélation")
+    ))
+
+    fig_heatmap.update_layout(
+        title="Corrélation des variables DE-LU",
+        height=700,
+        xaxis={'side': 'bottom'},
+        yaxis={'side': 'left'}
+    )
+    fig_heatmap = apply_plotly_theme(fig_heatmap)
+    st.plotly_chart(fig_heatmap, use_container_width=True)
 
 # ========================================
 # PAGE 2 : PRÉDICTIONS ML
