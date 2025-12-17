@@ -282,7 +282,7 @@ if page == "📊 Analyse Exploratoire (AED)":
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.markdown("**📦 Distribution demande électrique**")
+        st.markdown("<h3 style='color: #1a202c; font-size: 1.1em; margin-bottom: 10px;'>📦 Distribution demande électrique</h3>", unsafe_allow_html=True)
         df_de_copy = df_de_final.copy()
         df_de_copy['month'] = df_de_copy.index.month
         df_de_copy['month_name'] = df_de_copy['month'].map({
@@ -305,13 +305,14 @@ if page == "📊 Analyse Exploratoire (AED)":
             xaxis_title="Mois",
             height=450,
             showlegend=False,
-            margin=dict(t=30, b=50, l=60, r=30)
+            margin=dict(t=10, b=50, l=60, r=30),
+            title=None
         )
         fig_boxplot = apply_plotly_theme(fig_boxplot)
         st.plotly_chart(fig_boxplot, use_container_width=True)
 
     with col2:
-        st.markdown("**📊 Distribution mensuelle prix day-ahead**")
+        st.markdown("<h3 style='color: #1a202c; font-size: 1.1em; margin-bottom: 10px;'>📊 Distribution mensuelle prix day-ahead</h3>", unsafe_allow_html=True)
         prices = df_de_final["DE_LU_price_day_ahead"]
         years = [2018, 2019, 2020]
 
@@ -440,7 +441,7 @@ if page == "📊 Analyse Exploratoire (AED)":
         return fig
 
     with col1:
-        st.markdown("**🌞 Production solaire**")
+        st.markdown("<h3 style='color: #1a202c; font-size: 1.1em; margin-bottom: 10px;'>🌞 Production solaire</h3>", unsafe_allow_html=True)
         fig_solar_dist = plot_variable_compact(
             df_de_final,
             "DE_solar_generation_actual",
@@ -449,7 +450,7 @@ if page == "📊 Analyse Exploratoire (AED)":
         st.plotly_chart(fig_solar_dist, use_container_width=True)
 
     with col2:
-        st.markdown("**🌬️ Production éolienne**")
+        st.markdown("<h3 style='color: #1a202c; font-size: 1.1em; margin-bottom: 10px;'>🌬️ Production éolienne</h3>", unsafe_allow_html=True)
         fig_wind_dist = plot_variable_compact(
             df_de_final,
             "DE_wind_generation_actual",
@@ -458,7 +459,7 @@ if page == "📊 Analyse Exploratoire (AED)":
         st.plotly_chart(fig_wind_dist, use_container_width=True)
 
     # LIGNE 3 : Heatmap de corrélation en pleine largeur
-    st.markdown("**🔗 Matrice de corrélation des variables**")
+    st.markdown("<h3 style='color: #1a202c; font-size: 1.1em; margin-bottom: 10px; margin-top: 20px;'>🔗 Matrice de corrélation des variables</h3>", unsafe_allow_html=True)
 
     # Sélectionner uniquement les colonnes pour la heatmap comme dans le notebook
     heatmap_cols = [
