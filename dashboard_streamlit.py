@@ -45,32 +45,32 @@ st.markdown(f"""
 
     .kpi-card {{
         background: linear-gradient(135deg, {COLORS['card']} 0%, #f7fafc 100%);
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border-left: 5px solid {COLORS['primary']};
+        padding: 12px 8px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        border-left: 3px solid {COLORS['primary']};
         transition: all 0.3s ease;
     }}
     .kpi-card:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }}
     .kpi-title {{
         color: {COLORS['text_light']};
-        font-size: 0.9em;
+        font-size: 0.65em;
         font-weight: 600;
         text-transform: uppercase;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }}
     .kpi-value {{
         color: {COLORS['primary']};
-        font-size: 2.5em;
+        font-size: 1.6em;
         font-weight: 800;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
     }}
     .kpi-subtitle {{
         color: {COLORS['text_light']};
-        font-size: 0.85em;
+        font-size: 0.6em;
     }}
 
     .section-header {{
