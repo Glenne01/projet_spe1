@@ -161,17 +161,33 @@ def load_data():
     return df_model, df_de
 
 def apply_plotly_theme(fig):
-    """Applique le thème"""
+    """Applique le thème avec textes foncés"""
     fig.update_layout(
-        font=dict(family="Arial", size=13, color=COLORS['text_dark']),
-        title_font=dict(size=16, color=COLORS['text_dark']),
-        xaxis=dict(title_font=dict(color=COLORS['text_dark'], size=14),
-                   tickfont=dict(color=COLORS['text_dark'], size=12), gridcolor='#e2e8f0'),
-        yaxis=dict(title_font=dict(color=COLORS['text_dark'], size=14),
-                   tickfont=dict(color=COLORS['text_dark'], size=12), gridcolor='#e2e8f0'),
-        legend=dict(font=dict(color=COLORS['text_dark'], size=12)),
-        plot_bgcolor='white', paper_bgcolor='white'
+        font=dict(family="Arial", size=13, color='#1a202c'),
+        title_font=dict(size=16, color='#1a202c'),
+        plot_bgcolor='white',
+        paper_bgcolor='white'
     )
+
+    # Mettre à jour tous les axes pour qu'ils soient noirs
+    fig.update_xaxes(
+        title_font=dict(color='#1a202c', size=14),
+        tickfont=dict(color='#1a202c', size=12),
+        gridcolor='#e2e8f0',
+        linecolor='#1a202c',
+        tickcolor='#1a202c'
+    )
+
+    fig.update_yaxes(
+        title_font=dict(color='#1a202c', size=14),
+        tickfont=dict(color='#1a202c', size=12),
+        gridcolor='#e2e8f0',
+        linecolor='#1a202c',
+        tickcolor='#1a202c'
+    )
+
+    fig.update_layout(legend=dict(font=dict(color='#1a202c', size=12)))
+
     return fig
 
 @st.cache_resource
@@ -225,8 +241,12 @@ with st.spinner("🔄 Chargement des données..."):
 # ========================================
 
 st.markdown("""
-    <div style='text-align: center; padding: 0; margin: 0;'>
-        <h1 style='color: #1D3557; font-size: 1.1em; margin: 0; padding: 2px 0;'>
+    <div style='background: linear-gradient(135deg, #0077B6 0%, #023E8A 100%);
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                text-align: center;'>
+        <h1 style='color: white; font-size: 1.3em; margin: 0; padding: 0;'>
             ⚡ Dashboard Prix Day-Ahead DE-LU | Oct 2018 - Sept 2020
         </h1>
     </div>
@@ -362,21 +382,37 @@ if page == "📊 Analyse Exploratoire (AED)":
 
     with col1:
         st.markdown("**🌞 Production solaire**")
-        fig_solar_dist = plot_variable_compact(
-            df_de,
-            "DE_LU_solar_generation_actual",
-            "Solaire"
-        )
-        st.plotly_chart(fig_solar_dist, use_container_width=True)
+        # Vérifier si la colonne existe, sinon utiliser les colonnes disponibles
+        solar_col = None
+        for col in df_de.columns:
+            if 'solar' in col.lower():
+                solar_col = col
+                break
+
+        if solar_col:
+            fig_solar_dist = plot_variable_compact(
+                df_de,
+                solar_col,
+                "Solaire"
+            )
+            st.plotly_chart(fig_solar_dist, use_container_width=True)
 
     with col2:
         st.markdown("**🌬️ Production éolienne**")
-        fig_wind_dist = plot_variable_compact(
-            df_de,
-            "DE_LU_wind_generation_actual",
-            "Éolien"
-        )
-        st.plotly_chart(fig_wind_dist, use_container_width=True)
+        # Vérifier si la colonne existe
+        wind_col = None
+        for col in df_de.columns:
+            if 'wind' in col.lower() and 'generation' in col.lower():
+                wind_col = col
+                break
+
+        if wind_col:
+            fig_wind_dist = plot_variable_compact(
+                df_de,
+                wind_col,
+                "Éolien"
+            )
+            st.plotly_chart(fig_wind_dist, use_container_width=True)
 
     # LIGNE 3 : Heatmap de corrélation en pleine largeur
     st.markdown("**🔗 Matrice de corrélation des variables**")
