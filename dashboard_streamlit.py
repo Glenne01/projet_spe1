@@ -318,8 +318,8 @@ if page == "📊 Analyse Exploratoire (AED)":
         fig_monthly_price = apply_plotly_theme(fig_monthly_price)
         st.plotly_chart(fig_monthly_price, use_container_width=True)
 
-    # LIGNE 2 : Production Solaire + Production Éolienne + Heatmap
-    col1, col2, col3 = st.columns([1, 1, 1])
+    # LIGNE 2 : Production Solaire + Production Éolienne
+    col1, col2 = st.columns([1, 1])
 
     # Fonction simplifiée pour créer les graphiques de production
     def plot_variable_compact(df, var_name, var_label):
@@ -354,9 +354,10 @@ if page == "📊 Analyse Exploratoire (AED)":
                         row=idx, col=1
                     )
 
-            fig.update_yaxes(title_text="MW", row=idx, col=1)
+            fig.update_yaxes(title_text="MW", row=idx, col=1, titlefont=dict(size=12))
+            fig.update_xaxes(tickfont=dict(size=10), row=idx, col=1)
 
-        fig.update_layout(height=450, margin=dict(t=40, b=30, l=50, r=20))
+        fig.update_layout(height=450, margin=dict(t=40, b=30, l=60, r=20))
         return apply_plotly_theme(fig)
 
     with col1:
@@ -377,30 +378,31 @@ if page == "📊 Analyse Exploratoire (AED)":
         )
         st.plotly_chart(fig_wind_dist, use_container_width=True)
 
-    with col3:
-        st.markdown("**🔗 Corrélation**")
-        corr_matrix = df_de.corr()
+    # LIGNE 3 : Heatmap de corrélation en pleine largeur
+    st.markdown("**🔗 Matrice de corrélation des variables**")
+    corr_matrix = df_de.corr()
 
-        fig_heatmap = go.Figure(data=go.Heatmap(
-            z=corr_matrix.values,
-            x=corr_matrix.columns,
-            y=corr_matrix.columns,
-            colorscale='RdBu',
-            zmid=0,
-            text=np.round(corr_matrix.values, 2),
-            texttemplate='%{text}',
-            textfont={"size": 8},
-            colorbar=dict(title="Corr")
-        ))
+    fig_heatmap = go.Figure(data=go.Heatmap(
+        z=corr_matrix.values,
+        x=corr_matrix.columns,
+        y=corr_matrix.columns,
+        colorscale='RdBu',
+        zmid=0,
+        text=np.round(corr_matrix.values, 2),
+        texttemplate='%{text}',
+        textfont={"size": 10},
+        colorbar=dict(title="Corrélation")
+    ))
 
-        fig_heatmap.update_layout(
-            height=450,
-            xaxis={'side': 'bottom', 'tickfont': {'size': 8}},
-            yaxis={'side': 'left', 'tickfont': {'size': 8}},
-            margin=dict(t=30, b=40, l=40, r=40)
-        )
-        fig_heatmap = apply_plotly_theme(fig_heatmap)
-        st.plotly_chart(fig_heatmap, use_container_width=True)
+    fig_heatmap.update_layout(
+        title="Corrélation des variables DE-LU",
+        height=600,
+        xaxis={'side': 'bottom', 'tickfont': {'size': 11}, 'tickangle': 45},
+        yaxis={'side': 'left', 'tickfont': {'size': 11}},
+        margin=dict(t=60, b=100, l=200, r=50)
+    )
+    fig_heatmap = apply_plotly_theme(fig_heatmap)
+    st.plotly_chart(fig_heatmap, use_container_width=True)
 
 # ========================================
 # PAGE 2 : PRÉDICTIONS ML
