@@ -10,6 +10,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -229,9 +230,22 @@ def train_models(df_model):
         'feature': features, 'importance': xgb_model.feature_importances_
     }).sort_values('importance', ascending=False)
 
+    # SARIMA Model
+    train_sarima = df_model.loc["2018-10-01":"2020-06-30", "DE_LU_price_day_ahead"]
+    test_sarima = df_model.loc["2020-07-01":"2020-09-30", "DE_LU_price_day_ahead"]
+
+    # Entraîner SARIMA avec des paramètres optimaux pour données horaires
+    sarima_model = SARIMAX(train_sarima, order=(1, 1, 1), seasonal_order=(1, 1, 1, 24))
+    sarima_fitted = sarima_model.fit(disp=False)
+
+    # Prédire sur le test set
+    y_pred_sarima = sarima_fitted.forecast(steps=len(test_sarima))
+    y_pred_sarima = np.array(y_pred_sarima)
+
     return {
         'rf': rf, 'xgb': xgb_model, 'X_test': X_test, 'y_test': y_test,
         'y_pred_rf': y_pred_rf, 'y_pred_xgb': y_pred_xgb,
+        'y_pred_sarima': y_pred_sarima, 'sarima': sarima_fitted,
         'baseline_pred': baseline_pred, 'y_test_baseline': y_test_baseline,
         'features': features, 'feature_importance_rf': feature_importance_rf,
         'feature_importance_xgb': feature_importance_xgb, 'test': test
@@ -565,7 +579,7 @@ else:  # page == "Prédictions ML"
 
     model_choice = st.sidebar.radio(
         "Modèle",
-        ["XGBoost", "Random Forest"]
+        ["XGBoost", "Random Forest", "SARIMA"]
     )
 
     # Extraction prédictions
@@ -573,9 +587,12 @@ else:  # page == "Prédictions ML"
     if model_choice == "XGBoost":
         y_pred = models['y_pred_xgb']
         feature_importance = models['feature_importance_xgb']
-    else:  # Random Forest
+    elif model_choice == "Random Forest":
         y_pred = models['y_pred_rf']
         feature_importance = models['feature_importance_rf']
+    else:  # SARIMA
+        y_pred = models['y_pred_sarima']
+        feature_importance = None
 
     # Pas de filtre nécessaire car une seule période disponible
     y_test_filtered = y_test
