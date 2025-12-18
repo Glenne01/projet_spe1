@@ -247,7 +247,13 @@ def train_models(df_model):
     )
 
     sarima_fit = sarima_model.fit(disp=False)
-    sarima_pred = sarima_fit.forecast(steps=len(test_sarima))
+
+    # Prédictions sur la période test (comme dans le notebook)
+    sarima_pred = sarima_fit.predict(
+        start=test_sarima.index[0],
+        end=test_sarima.index[-1],
+        dynamic=False
+    )
     y_pred_sarima = np.array(sarima_pred)
 
     return {
