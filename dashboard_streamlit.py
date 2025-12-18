@@ -230,13 +230,20 @@ def train_models(df_model):
         'feature': features, 'importance': xgb_model.feature_importances_
     }).sort_values('importance', ascending=False)
 
-    # SARIMA Model
+    # SARIMA Model - Paramètres simplifiés pour performance
     train_sarima = df_model.loc["2018-10-01":"2020-06-30", "DE_LU_price_day_ahead"]
     test_sarima = df_model.loc["2020-07-01":"2020-09-30", "DE_LU_price_day_ahead"]
 
-    # Entraîner SARIMA avec des paramètres optimaux pour données horaires
-    sarima_model = SARIMAX(train_sarima, order=(1, 1, 1), seasonal_order=(1, 1, 1, 24))
-    sarima_fitted = sarima_model.fit(disp=False)
+    # Entraîner SARIMA avec des paramètres simplifiés (plus rapide)
+    # Utilisation de seasonal_order=(0,0,0,0) pour éviter la lenteur
+    sarima_model = SARIMAX(
+        train_sarima,
+        order=(1, 0, 1),  # ARIMA simple
+        seasonal_order=(0, 0, 0, 0),  # Pas de composante saisonnière pour la rapidité
+        enforce_stationarity=False,
+        enforce_invertibility=False
+    )
+    sarima_fitted = sarima_model.fit(disp=False, maxiter=50)
 
     # Prédire sur le test set
     y_pred_sarima = sarima_fitted.forecast(steps=len(test_sarima))
